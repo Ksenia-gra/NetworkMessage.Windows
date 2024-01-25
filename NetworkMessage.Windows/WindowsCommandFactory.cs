@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace NetworkMessage.Windows
 {
-    internal class WindowsCommandFactory : ICommandFactory
+    public class WindowsCommandFactory : ICommandFactory
     {
         public BaseNetworkCommand CreateAmountOfOccupiedRAMCommand()
         {
-            throw new NotImplementedException();
+            return new WindowsAmountOfOccupiedRAM();
         }
 
         public BaseNetworkCommand CreateAmountOfRAMCommand()
@@ -48,22 +48,22 @@ namespace NetworkMessage.Windows
 
         public BaseNetworkCommand CreateGuidCommand()
         {
-            throw new NotImplementedException();
+            return new WindowsGuidCommand();
         }
 
         public BaseNetworkCommand CreateMacAddressCommand()
         {
-            throw new NotImplementedException();
+            return new WindowsMacAddressCommand();
         }
 
         public BaseNetworkCommand CreateNestedDirectoriesInfoCommand(string path)
         {
-            throw new NotImplementedException();
+            return new WindowsNestedDirectoriesCommand(path);
         }
 
         public BaseNetworkCommand CreateNestedFilesInfoCommand(string path)
         {
-            throw new NotImplementedException();
+            return new WindowsNestedFilesInfoCommand(path);
         }
 
         public BaseNetworkCommand CreatePercentageOfCPUUsageCommand()

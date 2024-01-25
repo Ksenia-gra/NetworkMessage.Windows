@@ -16,23 +16,26 @@ namespace NetworkMessage.Windows.WindowsCommand
 
         public WindowsDownloadFileCommand(string path) 
         { 
+            if(!string.IsNullOrWhiteSpace(path) && path.IndexOf("root") == 0)
+            {
+                path = path.Substring(4);
+            }
             Path = path;
         }
 
-        public async override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
+        public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
         {
             BaseNetworkCommandResult loadedFileResult;
             if (!(File.Exists(Path)))
             {
-                loadedFileResult = new DownloadFileResult("File doesn't exist");
-                return loadedFileResult;
+                loadedFileResult = new DownloadFileResult(errorMessage: "File doesn't exist");
+                return Task.FromResult(loadedFileResult);
 
             }
 
             try
             {
-                byte[] file = await File.ReadAllBytesAsync(Path);
-                loadedFileResult = new DownloadFileResult(file);
+                loadedFileResult = new DownloadFileResult(Path);
             }
             catch (DirectoryNotFoundException directoryNotFoundException)
             {
@@ -54,7 +57,7 @@ namespace NetworkMessage.Windows.WindowsCommand
             {
                 loadedFileResult = new DownloadFileResult(ex.Message, ex);
             }
-            return loadedFileResult;
+            return Task.FromResult(loadedFileResult);
         }
     }
 }

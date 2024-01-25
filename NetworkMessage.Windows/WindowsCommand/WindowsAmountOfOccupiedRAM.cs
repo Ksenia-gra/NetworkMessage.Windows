@@ -12,7 +12,7 @@ using NickStrupat;
 
 namespace NetworkMessage.Windows.WindowsCommand
 {
-    internal class WindowsAmountOfOccupiedRAM : BaseNetworkCommand
+    public class WindowsAmountOfOccupiedRAM : BaseNetworkCommand
     {
         public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
         {
