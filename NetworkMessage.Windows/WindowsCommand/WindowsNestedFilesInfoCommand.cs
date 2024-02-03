@@ -28,17 +28,16 @@ namespace NetworkMessage.Windows.WindowsCommand
         public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
         {
             BaseNetworkCommandResult nestedFilesInfo;
-            if (string.IsNullOrWhiteSpace(Path))
+            if (string.IsNullOrWhiteSpace(Path) || Path == "/")
             {
-                IEnumerable<MyDirectoryInfo> drivesInfo = DriveInfo.GetDrives().Select(d => new MyDirectoryInfo(d.Name));
-                nestedFilesInfo = new NestedDirectoriesInfoResult(drivesInfo);
+                nestedFilesInfo = new NestedFilesInfoResult(new List<MyFileInfo>());
                 return Task.FromResult(nestedFilesInfo);
             }
 
             DirectoryInfo directoryInfo = new DirectoryInfo(Path);
             if (!directoryInfo.Exists)
             {
-                nestedFilesInfo = new NestedFilesInfoResult("File doesn't exist");
+                nestedFilesInfo = new NestedFilesInfoResult(errorMessage:"File doesn't exist");
                 return Task.FromResult(nestedFilesInfo);
             }
 

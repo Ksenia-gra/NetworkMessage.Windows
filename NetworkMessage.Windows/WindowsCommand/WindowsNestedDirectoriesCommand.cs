@@ -15,7 +15,7 @@ namespace NetworkMessage.Windows.WindowsCommand
     {
         public string Path { get; set; }
 
-        public WindowsNestedDirectoriesCommand(string path) 
+        public WindowsNestedDirectoriesCommand(string path)
         {
             if (!string.IsNullOrWhiteSpace(path) && path.IndexOf("root") == 0)
             {
@@ -29,9 +29,11 @@ namespace NetworkMessage.Windows.WindowsCommand
         {
             BaseNetworkCommandResult nestedDirectoriesInfo;
 
-            if (string.IsNullOrWhiteSpace(Path))
-            {
-                IEnumerable<MyDirectoryInfo> drivesInfo = DriveInfo.GetDrives().Select(d => new MyDirectoryInfo(d.Name));
+            if (string.IsNullOrWhiteSpace(Path) || Path == "/")
+            {                
+                IEnumerable<MyDirectoryInfo> drivesInfo = DriveInfo.GetDrives()
+                    .Select(d => "Disk_" + d.Name[..d.Name.IndexOf(':')])
+                    .Select(d => new MyDirectoryInfo(d));
                 nestedDirectoriesInfo = new NestedDirectoriesInfoResult(drivesInfo);
                 return Task.FromResult(nestedDirectoriesInfo);
             }
@@ -39,7 +41,7 @@ namespace NetworkMessage.Windows.WindowsCommand
             DirectoryInfo directoryInfo = new DirectoryInfo(Path);
             if (!directoryInfo.Exists)
             {
-                nestedDirectoriesInfo = new NestedDirectoriesInfoResult("File doesn't exist");
+                nestedDirectoriesInfo = new NestedDirectoriesInfoResult(errorMessage: "Directory doesn't exist");
                 return Task.FromResult(nestedDirectoriesInfo);
             }
 

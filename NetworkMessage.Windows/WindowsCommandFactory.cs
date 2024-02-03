@@ -18,22 +18,22 @@ namespace NetworkMessage.Windows
 
         public BaseNetworkCommand CreateAmountOfRAMCommand()
         {
-            throw new NotImplementedException();
+            return new WindowsAmountOfRAMCommand();
         }
 
         public BaseNetworkCommand CreateBatteryChargePersentageCommand()
         {
-            throw new NotImplementedException();
+            return new WindowsBatteryChargePersentageCommand();
         }
 
         public BaseNetworkCommand CreateDirectoryInfoCommand(string path)
         {
-            throw new NotImplementedException();
+            return new WindowsDirectoryInfoCommand(path);
         }
 
         public BaseNetworkCommand CreateDownloadDirectoryCommand(string path)
         {
-            throw new NotImplementedException();
+            return new WindowsDownloadDirectoryCommand(path);
         }
 
         public BaseNetworkCommand CreateDownloadFileCommand(string path)
@@ -43,7 +43,7 @@ namespace NetworkMessage.Windows
 
         public BaseNetworkCommand CreateFileInfoCommand(string path)
         {
-            throw new NotImplementedException();
+            return new WindowsFileInfoCommand(path);
         }
 
         public BaseNetworkCommand CreateGuidCommand()
@@ -68,12 +68,12 @@ namespace NetworkMessage.Windows
 
         public BaseNetworkCommand CreatePercentageOfCPUUsageCommand()
         {
-            throw new NotImplementedException();
+            return new WindowsPercentageOfCPUUsageCommand();
         }
 
         public BaseNetworkCommand CreateScreenshotCommand()
         {
-            throw new NotImplementedException();
+            return new WindowsSceenshotCommand();
         }
     }
 }
