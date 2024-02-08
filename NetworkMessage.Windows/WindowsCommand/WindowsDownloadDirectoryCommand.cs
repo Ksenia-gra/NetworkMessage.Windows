@@ -1,5 +1,6 @@
 ﻿using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
+using NetworkMessage.CommandsResults.ConcreteCommandResults;
 using NetworkMessage.Intents;
 using NetworkMessage.Models;
 using System;

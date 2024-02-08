@@ -1,11 +1,7 @@
 ﻿using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using NetworkMessage.CommandsResults.ConcreteCommandResults;
 using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NetworkMessage.Windows.WindowsCommand
 {

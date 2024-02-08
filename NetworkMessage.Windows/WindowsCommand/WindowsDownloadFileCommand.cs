@@ -1,5 +1,6 @@
 ﻿using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
+using NetworkMessage.CommandsResults.ConcreteCommandResults;
 using System;
 using System.Collections.Generic;
 using System.IO;

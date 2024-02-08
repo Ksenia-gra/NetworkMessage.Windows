@@ -1,14 +1,7 @@
 ﻿using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
-using System;
-using System.CodeDom.Compiler;
-using Microsoft.VisualBasic;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NickStrupat;
+using NetworkMessage.CommandsResults.ConcreteCommandResults;
 
 namespace NetworkMessage.Windows.WindowsCommand
 {
