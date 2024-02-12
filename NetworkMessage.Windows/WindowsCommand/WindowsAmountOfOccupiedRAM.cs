@@ -1,6 +1,6 @@
-﻿using NetworkMessage.Commands;
+﻿using Microsoft.VisualBasic.Devices;
+using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
-using NickStrupat;
 using NetworkMessage.CommandsResults.ConcreteCommandResults;
 
 namespace NetworkMessage.Windows.WindowsCommand
@@ -9,11 +9,12 @@ namespace NetworkMessage.Windows.WindowsCommand
     {
         public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
         {
-            ComputerInfo computerInfo = new ComputerInfo();
-            float totalMemoryAmount = (float)Math.Round((computerInfo.TotalPhysicalMemory / 1024.0 / 1024.0 / 1024.0), 1);
-            float availableMemoryAmount = (float)Math.Round((computerInfo.AvailablePhysicalMemory / 1024.0 / 1024.0 / 1024.0), 1);
-            BaseNetworkCommandResult totalOccupiedMemory = new AmountOfOccupiedRAMResult(totalMemoryAmount - availableMemoryAmount);
-            return Task.FromResult(totalOccupiedMemory);
-        }
+			float freeRam = (float)Math.Round(new ComputerInfo().AvailablePhysicalMemory / 1024.0 / 1024.0 / 1024.0, 1);
+			GCMemoryInfo gcMemoryInfo = GC.GetGCMemoryInfo();
+			long totalMemory = gcMemoryInfo.TotalAvailableMemoryBytes;
+			float totalMemoryAmount = (float)Math.Ceiling(totalMemory / 1024.0 / 1024.0 / 1024.0);
+			BaseNetworkCommandResult totalMemoryRes = new AmountOfOccupiedRAMResult(totalMemoryAmount - freeRam);
+			return Task.FromResult(totalMemoryRes);
+		}
     }
 }

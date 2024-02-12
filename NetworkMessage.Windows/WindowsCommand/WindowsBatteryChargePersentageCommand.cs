@@ -1,16 +1,11 @@
 ﻿using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
 using NetworkMessage.CommandsResults.ConcreteCommandResults;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Management;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NetworkMessage.Windows.WindowsCommand
 {
-    public class WindowsBatteryChargePersentageCommand : BaseNetworkCommand
+	public class WindowsBatteryChargePersentageCommand : BaseNetworkCommand
     {
         public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
         {
@@ -24,7 +19,7 @@ namespace NetworkMessage.Windows.WindowsCommand
                 {
                     if (powerDevice == null && powerDevice["EstimatedChargeRemaining"] == null) break;
                     batteryLevel = Convert.ToByte(powerDevice["EstimatedChargeRemaining"]);
-                }
+                }   
                 butteryChargePercent = new BatteryChargeResult(batteryLevel);
             }
             catch(Exception ex)

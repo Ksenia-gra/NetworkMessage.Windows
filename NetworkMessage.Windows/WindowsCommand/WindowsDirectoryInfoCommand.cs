@@ -20,28 +20,30 @@ namespace NetworkMessage.Windows.WindowsCommand
         {
             if (!string.IsNullOrWhiteSpace(path) && path.IndexOf("root") == 0)
             {
-                path = path.Substring(4);
+                path = path.Substring(5);
             }
             Path = path;
         }
 
         public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
         {
-            DirectoryInfo directoryInfo = new DirectoryInfo(Path);
-            BaseNetworkCommandResult directoryInfoResult;
-            if (!directoryInfo.Exists)
-            {
-                directoryInfoResult = new DirectoryInfoResult(errorMessage: "Directory doesn't exist");
-                return Task.FromResult(directoryInfoResult);
-            }
-
+            BaseNetworkCommandResult directoryInfoResult;       
             try
             {
-                string directoryName = directoryInfo.Name;
+                Path = Path[5..];
+                Path = Path.Insert(Path.IndexOf('/'), ":");
+                DirectoryInfo directoryInfo = new DirectoryInfo(Path);
+                if (!directoryInfo.Exists)
+                {
+                    directoryInfoResult = new DirectoryInfoResult(errorMessage: "Directory doesn't exist");
+                    return Task.FromResult(directoryInfoResult);
+                }
+
                 DateTime creationTime = directoryInfo.CreationTimeUtc;
                 DateTime changingDate = directoryInfo.LastWriteTimeUtc;
-                string fullName = directoryInfo.FullName;
-                directoryInfoResult = new DirectoryInfoResult(new MyDirectoryInfo(directoryName, creationTime, changingDate, fullName));
+                string[] splited = directoryInfo.FullName.Split(":");
+                string fullName = "Disk_" + splited[0] + splited[1..];
+                directoryInfoResult = new DirectoryInfoResult(new MyDirectoryInfo(directoryInfo.Name, creationTime, changingDate, fullName));
             }
             catch (DirectoryNotFoundException directoryNotFoundException)
             {

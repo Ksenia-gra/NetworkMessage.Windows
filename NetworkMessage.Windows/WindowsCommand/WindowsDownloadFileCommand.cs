@@ -19,7 +19,7 @@ namespace NetworkMessage.Windows.WindowsCommand
         { 
             if(!string.IsNullOrWhiteSpace(path) && path.IndexOf("root") == 0)
             {
-                path = path.Substring(4);
+                path = path.Substring(5);
             }
             Path = path;
         }
@@ -27,15 +27,16 @@ namespace NetworkMessage.Windows.WindowsCommand
         public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
         {
             BaseNetworkCommandResult loadedFileResult;
-            if (!(File.Exists(Path)))
+			try
             {
-                loadedFileResult = new DownloadFileResult(errorMessage: "File doesn't exist");
-                return Task.FromResult(loadedFileResult);
+                Path = Path[5..];
+                Path = Path.Insert(Path.IndexOf('/'), ":");
+                if (!(File.Exists(Path)))
+                {
+                    loadedFileResult = new DownloadFileResult(errorMessage: "File doesn't exist");
+                    return Task.FromResult(loadedFileResult);
+                }
 
-            }
-
-            try
-            {
                 loadedFileResult = new DownloadFileResult(Path);
             }
             catch (DirectoryNotFoundException directoryNotFoundException)

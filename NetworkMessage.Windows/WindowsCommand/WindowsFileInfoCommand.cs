@@ -15,7 +15,7 @@ namespace NetworkMessage.Windows.WindowsCommand
         {
             if (!string.IsNullOrWhiteSpace(path) && path.IndexOf("root") == 0)
             {
-                path = path.Substring(4);
+                path = path.Substring(5);
             }
 
             Path = path;
@@ -23,21 +23,24 @@ namespace NetworkMessage.Windows.WindowsCommand
 
         public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
         {
-            FileInfo fileInfo = new FileInfo(Path);
             BaseNetworkCommandResult fileInfoResult;
-            if (!fileInfo.Exists)
-            {
-                fileInfoResult = new FileInfoResult(errorMessage: "File doesn't exist");
-                return Task.FromResult(fileInfoResult);
-            }
             try
             {
-                
+                Path = Path[5..];
+                Path = Path.Insert(Path.IndexOf('/'), ":");
+                FileInfo fileInfo = new FileInfo(Path);
+                if (!fileInfo.Exists)
+                {
+                    fileInfoResult = new FileInfoResult(errorMessage: "File doesn't exist");
+                    return Task.FromResult(fileInfoResult);
+                }
+
                 string fileName = fileInfo.Name;
                 long fileLength = fileInfo.Length;
                 DateTime creationTime = fileInfo.CreationTimeUtc;
                 DateTime changingDate = fileInfo.LastWriteTimeUtc;
-                string fullName = fileInfo.FullName;
+                string[] splited = fileInfo.FullName.Split(":");
+                string fullName = "Disk_" + splited[0] + splited[1..];
                 fileInfoResult = new FileInfoResult(new MyFileInfo(fileName, creationTime, changingDate, fileLength, fullName));
             }
             catch (DirectoryNotFoundException directoryNotFoundException)

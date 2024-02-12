@@ -3,6 +3,7 @@ using NetworkMessage.CommandsResults;
 using NetworkMessage.CommandsResults.ConcreteCommandResults;
 using NetworkMessage.Models;
 using System.IO;
+using System.Reflection;
 using System.Security;
 
 namespace NetworkMessage.Windows.WindowsCommand
@@ -15,7 +16,7 @@ namespace NetworkMessage.Windows.WindowsCommand
         {
             if (!string.IsNullOrWhiteSpace(path) && path.IndexOf("root") == 0)
             {
-                path = path.Substring(4);
+                path = path.Substring(5);
             }
 
             Path = path;
@@ -24,23 +25,29 @@ namespace NetworkMessage.Windows.WindowsCommand
         public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
         {
             BaseNetworkCommandResult nestedFilesInfo;
-            if (string.IsNullOrWhiteSpace(Path) || Path == "/")
-            {
-                nestedFilesInfo = new NestedFilesInfoResult(new List<MyFileInfo>());
-                return Task.FromResult(nestedFilesInfo);
-            }
-
-            DirectoryInfo directoryInfo = new DirectoryInfo(Path);
-            if (!directoryInfo.Exists)
-            {
-                nestedFilesInfo = new NestedFilesInfoResult(errorMessage:"File doesn't exist");
-                return Task.FromResult(nestedFilesInfo);
-            }
-
             try
             {
+                if (string.IsNullOrWhiteSpace(Path) || Path == "/")
+                {
+                    nestedFilesInfo = new NestedFilesInfoResult(new List<MyFileInfo>());
+                    return Task.FromResult(nestedFilesInfo);
+                }
+
+                Path = Path[5..];
+                Path = Path.Insert(Path.IndexOf('/'), ":");
+                DirectoryInfo directoryInfo = new DirectoryInfo(Path);
+                if (!directoryInfo.Exists)
+                {
+                    nestedFilesInfo = new NestedFilesInfoResult(errorMessage: "File doesn't exist");
+                    return Task.FromResult(nestedFilesInfo);
+                }
+
                 IEnumerable<MyFileInfo> filesInfo
-                    = directoryInfo.GetFiles().Select(f => new MyFileInfo(f.Name, f.CreationTimeUtc, f.LastWriteTimeUtc, f.Length, f.FullName));
+                    = directoryInfo.GetFiles().Select(f => {
+                        string[] splited = f.FullName.Split(":");
+                        string fullName = "Disk_" + splited[0] + splited[1..];
+                        return new MyFileInfo(f.Name, f.CreationTimeUtc, f.LastWriteTimeUtc, f.Length, fullName);
+                    });
                 nestedFilesInfo = new NestedFilesInfoResult(filesInfo);
             }
             catch (DirectoryNotFoundException directoryNotFoundException)

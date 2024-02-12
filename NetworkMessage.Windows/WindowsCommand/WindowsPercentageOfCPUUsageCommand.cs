@@ -7,7 +7,7 @@ namespace NetworkMessage.Windows.WindowsCommand
 {
     public class WindowsPercentageOfCPUUsageCommand : BaseNetworkCommand
     {
-        public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
+        public override async Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
         {
             PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
             float sum = 0;
@@ -15,11 +15,11 @@ namespace NetworkMessage.Windows.WindowsCommand
             {
                 float cpuUsage = cpuCounter.NextValue();
                 sum += cpuUsage;
-                Thread.Sleep(10);
+                await Task.Delay(10);
             }
 
-            BaseNetworkCommandResult cpuResult = new PercentageOfCPUUsageResult((byte)(sum/100));
-            return Task.FromResult(cpuResult);
+            BaseNetworkCommandResult cpuResult = new PercentageOfCPUUsageResult((byte)(sum / 100.0));
+            return cpuResult;
         }
     }
 }

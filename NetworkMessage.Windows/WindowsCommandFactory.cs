@@ -36,6 +36,11 @@ namespace NetworkMessage.Windows
 			return new WindowsDownloadFileCommand(path);
 		}
 
+		public INetworkCommand CreateDrivesInfoCommand()
+		{
+			throw new NotImplementedException();
+		}
+
 		public INetworkCommand CreateFileInfoCommand(string path)
 		{
 			return new WindowsFileInfoCommand(path);
@@ -66,9 +71,19 @@ namespace NetworkMessage.Windows
 			return new WindowsPercentageOfCPUUsageCommand();
 		}
 
+		public INetworkCommand CreateProgramsInfoCommand()
+		{
+			throw new NotImplementedException();
+		}
+
 		public INetworkCommand CreateScreenshotCommand()
 		{
 			return new WindowsSceenshotCommand();
+		}
+
+		public INetworkCommand CreateStartProgramCommand(string path)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

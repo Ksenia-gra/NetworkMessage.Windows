@@ -1,7 +1,6 @@
 ﻿using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
 using NetworkMessage.CommandsResults.ConcreteCommandResults;
-using NickStrupat;
 
 namespace NetworkMessage.Windows.WindowsCommand
 {
@@ -9,8 +8,9 @@ namespace NetworkMessage.Windows.WindowsCommand
     {
         public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
         {
-            ComputerInfo computerInfo = new ComputerInfo();
-            float totalMemoryAmount = (float)Math.Round((computerInfo.TotalPhysicalMemory / 1024.0 / 1024.0 / 1024.0), 1);
+			GCMemoryInfo gcMemoryInfo = GC.GetGCMemoryInfo();
+			long totalMemory = gcMemoryInfo.TotalAvailableMemoryBytes;
+			float totalMemoryAmount = (float)Math.Ceiling(totalMemory / 1024.0 / 1024.0 / 1024.0);
             BaseNetworkCommandResult totalMemoryRes = new AmountOfRAMResult(totalMemoryAmount);
             return Task.FromResult(totalMemoryRes);
         }
