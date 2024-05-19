@@ -1,16 +1,8 @@
 ﻿using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
 using NetworkMessage.CommandsResults.ConcreteCommandResults;
-using NetworkMessage.Intents;
-using NetworkMessage.Models;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Security;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NetworkMessage.Windows.WindowsCommand
 {
@@ -20,10 +12,24 @@ namespace NetworkMessage.Windows.WindowsCommand
 
         public WindowsDownloadDirectoryCommand(string path) 
         {
-            if (!string.IsNullOrWhiteSpace(path) && path.IndexOf("root") == 0)
+            const string root = "root";
+            if (!string.IsNullOrWhiteSpace(path) && path.IndexOf(root) == 0)
             {
-                path = path.Substring(5);
+                path = path[root.Length..].Replace('\\', '/').ToLower();
+                if (!string.IsNullOrWhiteSpace(path))
+                {
+                    if (path.First() == '/')
+                    {
+                        path = path[1..];
+                    }
+                    
+                    if (path.LastOrDefault() != '/')
+                    {
+                        path += '/';
+                    }
+                }
             }
+
             Path = path;
         }
 
@@ -32,20 +38,27 @@ namespace NetworkMessage.Windows.WindowsCommand
             BaseNetworkCommandResult downloadDirectoryResult;
             try
             {
+                const string disk = "disk_";
                 if (string.IsNullOrWhiteSpace(Path) || Path == "/")
                 {
                     downloadDirectoryResult = new DownloadDirectoryResult(errorMessage: "Directory doesn't exist");
                     return Task.FromResult(downloadDirectoryResult);
                 }
 
-                Path = Path[5..];
+                Path = Path[disk.Length..];
                 Path = Path.Insert(Path.IndexOf('/'), ":");
+                if (Path.Last() == '/')
+                {
+                    Path = Path[..^1];
+                }
+                
                 DirectoryInfo directoryInfo = new DirectoryInfo(Path);
                 if (!directoryInfo.Exists)
                 {
                     downloadDirectoryResult = new DownloadDirectoryResult(errorMessage: "Directory doesn't exist");
                     return Task.FromResult(downloadDirectoryResult);
                 }
+                
                 downloadDirectoryResult = new DownloadDirectoryResult(Path);
             }
             catch (DirectoryNotFoundException directoryNotFoundException)

@@ -12,11 +12,24 @@ namespace NetworkMessage.Windows.WindowsCommand
     {
         public string Path { get; set; }
 
-        public WindowsNestedFilesInfoCommand(string path) 
+        public WindowsNestedFilesInfoCommand(string path)
         {
-            if (!string.IsNullOrWhiteSpace(path) && path.IndexOf("root") == 0)
+            string root = "root";
+            if (!string.IsNullOrWhiteSpace(path) && path.IndexOf(root) == 0)
             {
-                path = path.Substring(5);
+                path = path[root.Length..].Replace('\\', '/').ToLower();
+                if (!string.IsNullOrWhiteSpace(path))
+                {
+                    if (path.First() == '/')
+                    {
+                        path = path[1..];
+                    }
+                    
+                    if (path.Last() != '/')
+                    {
+                        path += '/';
+                    }
+                }
             }
 
             Path = path;
@@ -27,13 +40,14 @@ namespace NetworkMessage.Windows.WindowsCommand
             BaseNetworkCommandResult nestedFilesInfo;
             try
             {
+                const string disk = "disk_";
                 if (string.IsNullOrWhiteSpace(Path) || Path == "/")
                 {
-                    nestedFilesInfo = new NestedFilesInfoResult(new List<MyFileInfo>());
+                    nestedFilesInfo = new NestedFilesInfoResult(errorMessage: "File doesn't exist");
                     return Task.FromResult(nestedFilesInfo);
                 }
-
-                Path = Path[5..];
+                
+                Path = Path[disk.Length..];
                 Path = Path.Insert(Path.IndexOf('/'), ":");
                 DirectoryInfo directoryInfo = new DirectoryInfo(Path);
                 if (!directoryInfo.Exists)
@@ -43,9 +57,10 @@ namespace NetworkMessage.Windows.WindowsCommand
                 }
 
                 IEnumerable<MyFileInfo> filesInfo
-                    = directoryInfo.GetFiles().Select(f => {
-                        string[] splited = f.FullName.Split(":");
-                        string fullName = "Disk_" + splited[0] + splited[1..];
+                    = directoryInfo.GetFiles().Select(f => 
+                    {
+                        string[] splited = f.FullName.Replace('\\', '/').Split(":");
+                        string fullName = "Disk_" + splited[0] + splited[1];
                         return new MyFileInfo(f.Name, f.CreationTimeUtc, f.LastWriteTimeUtc, f.Length, fullName);
                     });
                 nestedFilesInfo = new NestedFilesInfoResult(filesInfo);

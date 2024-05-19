@@ -17,10 +17,24 @@ namespace NetworkMessage.Windows.WindowsCommand
 
         public WindowsDownloadFileCommand(string path) 
         { 
-            if(!string.IsNullOrWhiteSpace(path) && path.IndexOf("root") == 0)
+            const string root = "root";
+            if (!string.IsNullOrWhiteSpace(path) && path.IndexOf(root) == 0)
             {
-                path = path.Substring(5);
+                path = path[root.Length..].Replace('\\', '/').ToLower();
+                if (!string.IsNullOrWhiteSpace(path))
+                {
+                    if (path.First() == '/')
+                    {
+                        path = path[1..];
+                    }
+                    
+                    if (path.LastOrDefault() != '/')
+                    {
+                        path += '/';
+                    }
+                }
             }
+
             Path = path;
         }
 
@@ -29,9 +43,21 @@ namespace NetworkMessage.Windows.WindowsCommand
             BaseNetworkCommandResult loadedFileResult;
 			try
             {
-                Path = Path[5..];
+                const string disk = "disk_";
+                if (string.IsNullOrWhiteSpace(Path) || Path == "/")
+                {
+                    loadedFileResult = new DownloadFileResult(errorMessage: "File doesn't exist");
+                    return Task.FromResult(loadedFileResult);                    
+                }
+                
+                Path = Path[disk.Length..];
                 Path = Path.Insert(Path.IndexOf('/'), ":");
-                if (!(File.Exists(Path)))
+                if (Path.Last() == '/')
+                {
+                    Path = Path[..^1];
+                }
+                
+                if (!File.Exists(Path))
                 {
                     loadedFileResult = new DownloadFileResult(errorMessage: "File doesn't exist");
                     return Task.FromResult(loadedFileResult);
@@ -59,6 +85,7 @@ namespace NetworkMessage.Windows.WindowsCommand
             {
                 loadedFileResult = new DownloadFileResult(ex.Message, ex);
             }
+            
             return Task.FromResult(loadedFileResult);
         }
     }

@@ -5,19 +5,20 @@
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
-    <Version>1.1.0</Version>
+	<Version>1.1.0</Version>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Authors>gurynych, Ksenia-gra</Authors>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Authors>gurynych, Ksenia-gra</Authors>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ComputerInfo" Version="0.2.0" />
     <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="NetworkMessage">
-      <HintPath>..\..\RemoteControlCommunicator\NetworkMessage\bin\Debug\net8.0\NetworkMessage.dll</HintPath>
+      <HintPath>..\..\NetworkMessage\NetworkMessage\bin\Debug\net8.0\NetworkMessage.dll</HintPath>
     </Reference>
   </ItemGroup>
 
