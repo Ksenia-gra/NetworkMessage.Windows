@@ -41,7 +41,7 @@ namespace NetworkMessage.Windows.WindowsCommand
                 const string disk = "disk_";
                 if (string.IsNullOrWhiteSpace(Path) || Path == "/")
                 {
-                    downloadDirectoryResult = new DownloadDirectoryResult(errorMessage: "Directory doesn't exist");
+                    downloadDirectoryResult = new DownloadDirectoryResult(errorMessage: "Incorrect path");
                     return Task.FromResult(downloadDirectoryResult);
                 }
 

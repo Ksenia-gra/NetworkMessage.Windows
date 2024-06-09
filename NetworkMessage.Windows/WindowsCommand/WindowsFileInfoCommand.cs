@@ -1,9 +1,9 @@
 ﻿using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
 using NetworkMessage.CommandsResults.ConcreteCommandResults;
-using NetworkMessage.Models;
 using System.IO;
 using System.Security;
+using NetworkMessage.DTO;
 
 namespace NetworkMessage.Windows.WindowsCommand
 {
@@ -13,9 +13,22 @@ namespace NetworkMessage.Windows.WindowsCommand
 
         public WindowsFileInfoCommand(string path)
         {
-            if (!string.IsNullOrWhiteSpace(path) && path.IndexOf("root") == 0)
+            const string root = "root";
+            if (!string.IsNullOrWhiteSpace(path) && path.IndexOf(root) == 0)
             {
-                path = path.Substring(5);
+                path = path[root.Length..].Replace('\\', '/').ToLower();
+                if (!string.IsNullOrWhiteSpace(path))
+                {
+                    if (path.First() == '/')
+                    {
+                        path = path[1..];
+                    }
+                    
+                    if (path.LastOrDefault() != '/')
+                    {
+                        path += '/';
+                    }
+                }
             }
 
             Path = path;
@@ -26,22 +39,34 @@ namespace NetworkMessage.Windows.WindowsCommand
             BaseNetworkCommandResult fileInfoResult;
             try
             {
-                Path = Path[5..];
+                const string disk = "disk_";
+                if (string.IsNullOrWhiteSpace(Path) || Path == "/")
+                {
+                    fileInfoResult = new FileInfoResult(errorMessage: "Incorrect path");
+                    return Task.FromResult(fileInfoResult);
+                }
+
+                Path = Path[disk.Length..];
                 Path = Path.Insert(Path.IndexOf('/'), ":");
+                if (Path.Last() == '/')
+                {
+                    Path = Path[..^1];
+                }
+
                 FileInfo fileInfo = new FileInfo(Path);
                 if (!fileInfo.Exists)
                 {
                     fileInfoResult = new FileInfoResult(errorMessage: "File doesn't exist");
                     return Task.FromResult(fileInfoResult);
                 }
-
+                
                 string fileName = fileInfo.Name;
                 long fileLength = fileInfo.Length;
                 DateTime creationTime = fileInfo.CreationTimeUtc;
                 DateTime changingDate = fileInfo.LastWriteTimeUtc;
                 string[] splited = fileInfo.FullName.Split(":");
                 string fullName = "Disk_" + splited[0] + splited[1..];
-                fileInfoResult = new FileInfoResult(new MyFileInfo(fileName, creationTime, changingDate, fileLength, fullName));
+                fileInfoResult = new FileInfoResult(new FileInfoDTO(fileName, creationTime, changingDate, fileLength, fullName, FileType.File));
             }
             catch (DirectoryNotFoundException directoryNotFoundException)
             {

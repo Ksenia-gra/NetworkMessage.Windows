@@ -1,13 +1,8 @@
 ﻿using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
 using NetworkMessage.CommandsResults.ConcreteCommandResults;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NetworkMessage.Windows.WindowsCommand
 {
@@ -46,7 +41,7 @@ namespace NetworkMessage.Windows.WindowsCommand
                 const string disk = "disk_";
                 if (string.IsNullOrWhiteSpace(Path) || Path == "/")
                 {
-                    loadedFileResult = new DownloadFileResult(errorMessage: "File doesn't exist");
+                    loadedFileResult = new DownloadFileResult(errorMessage: "Incorrect path");
                     return Task.FromResult(loadedFileResult);                    
                 }
                 

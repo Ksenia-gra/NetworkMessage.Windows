@@ -10,6 +10,7 @@ namespace NetworkMessage.Windows.WindowsCommand
         {
 			GCMemoryInfo gcMemoryInfo = GC.GetGCMemoryInfo();
 			long totalMemory = gcMemoryInfo.TotalAvailableMemoryBytes;
+            //TODO Заменить на байты
 			float totalMemoryAmount = (float)Math.Ceiling(totalMemory / 1024.0 / 1024.0 / 1024.0);
             BaseNetworkCommandResult totalMemoryRes = new AmountOfRAMResult(totalMemoryAmount);
             return Task.FromResult(totalMemoryRes);

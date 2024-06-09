@@ -1,14 +1,9 @@
 ﻿using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
 using NetworkMessage.CommandsResults.ConcreteCommandResults;
-using NetworkMessage.Models;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security;
-using System.Text;
-using System.Threading.Tasks;
+using NetworkMessage.DTO;
 
 namespace NetworkMessage.Windows.WindowsCommand
 {
@@ -18,32 +13,55 @@ namespace NetworkMessage.Windows.WindowsCommand
 
         public WindowsDirectoryInfoCommand(string path) 
         {
-            if (!string.IsNullOrWhiteSpace(path) && path.IndexOf("root") == 0)
+            const string root = "root";
+            if (!string.IsNullOrWhiteSpace(path) && path.IndexOf(root) == 0)
             {
-                path = path.Substring(5);
+                path = path[root.Length..].Replace('\\', '/').ToLower();
+                if (!string.IsNullOrWhiteSpace(path))
+                {
+                    if (path.First() == '/')
+                    {
+                        path = path[1..];
+                    }
+                    
+                    if (path.LastOrDefault() != '/')
+                    {   
+                        path += '/';
+                    }
+                }
             }
+
             Path = path;
         }
 
-        public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
+        public override async Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
         {
             BaseNetworkCommandResult directoryInfoResult;       
             try
             {
-                Path = Path[5..];
-                Path = Path.Insert(Path.IndexOf('/'), ":");
+                const string disk = "disk_";
+                if (string.IsNullOrWhiteSpace(Path) || Path == "/")
+                {
+                    directoryInfoResult = new DirectoryInfoResult(errorMessage: "Incorrect path");
+                    return directoryInfoResult;
+                }
+
+                Path = Path[disk.Length..];
+                Path = Path.Insert(Path.IndexOf('/'), ":"); 
                 DirectoryInfo directoryInfo = new DirectoryInfo(Path);
                 if (!directoryInfo.Exists)
                 {
                     directoryInfoResult = new DirectoryInfoResult(errorMessage: "Directory doesn't exist");
-                    return Task.FromResult(directoryInfoResult);
+                    return directoryInfoResult;
                 }
-
+                
                 DateTime creationTime = directoryInfo.CreationTimeUtc;
                 DateTime changingDate = directoryInfo.LastWriteTimeUtc;
                 string[] splited = directoryInfo.FullName.Split(":");
                 string fullName = "Disk_" + splited[0] + splited[1..];
-                directoryInfoResult = new DirectoryInfoResult(new MyDirectoryInfo(directoryInfo.Name, creationTime, changingDate, fullName));
+                long dirSize = await Task.Run(() => directoryInfo.EnumerateFiles( "*", SearchOption.AllDirectories).Sum(file => file.Length))
+                    .ConfigureAwait(false);
+                directoryInfoResult = new DirectoryInfoResult(new FileInfoDTO(directoryInfo.Name, creationTime, changingDate, dirSize, fullName, FileType.Directory));
             }
             catch (DirectoryNotFoundException directoryNotFoundException)
             {
@@ -65,7 +83,8 @@ namespace NetworkMessage.Windows.WindowsCommand
             {
                 directoryInfoResult = new FileInfoResult(exception.Message, exception);
             }
-            return Task.FromResult(directoryInfoResult);
+            
+            return directoryInfoResult;
         }
     }
 }

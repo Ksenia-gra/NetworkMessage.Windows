@@ -1,14 +1,13 @@
 ﻿using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
 using NetworkMessage.CommandsResults.ConcreteCommandResults;
-using NetworkMessage.Models;
 using System.IO;
-using System.Reflection;
 using System.Security;
+using NetworkMessage.DTO;
 
 namespace NetworkMessage.Windows.WindowsCommand
 {
-    public class WindowsNestedFilesInfoCommand:BaseNetworkCommand
+    public class WindowsNestedFilesInfoCommand : BaseNetworkCommand
     {
         public string Path { get; set; }
 
@@ -24,8 +23,8 @@ namespace NetworkMessage.Windows.WindowsCommand
                     {
                         path = path[1..];
                     }
-                    
-                    if (path.Last() != '/')
+
+                    if (path.LastOrDefault() != '/')
                     {
                         path += '/';
                     }
@@ -35,7 +34,8 @@ namespace NetworkMessage.Windows.WindowsCommand
             Path = path;
         }
 
-        public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
+        public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default,
+            params object[] objects)
         {
             BaseNetworkCommandResult nestedFilesInfo;
             try
@@ -46,7 +46,7 @@ namespace NetworkMessage.Windows.WindowsCommand
                     nestedFilesInfo = new NestedFilesInfoResult(errorMessage: "File doesn't exist");
                     return Task.FromResult(nestedFilesInfo);
                 }
-                
+
                 Path = Path[disk.Length..];
                 Path = Path.Insert(Path.IndexOf('/'), ":");
                 DirectoryInfo directoryInfo = new DirectoryInfo(Path);
@@ -56,13 +56,12 @@ namespace NetworkMessage.Windows.WindowsCommand
                     return Task.FromResult(nestedFilesInfo);
                 }
 
-                IEnumerable<MyFileInfo> filesInfo
-                    = directoryInfo.GetFiles().Select(f => 
-                    {
-                        string[] splited = f.FullName.Replace('\\', '/').Split(":");
-                        string fullName = "Disk_" + splited[0] + splited[1];
-                        return new MyFileInfo(f.Name, f.CreationTimeUtc, f.LastWriteTimeUtc, f.Length, fullName);
-                    });
+                IEnumerable<FileInfoDTO> filesInfo = directoryInfo.GetFiles().Select(f =>
+                {
+                    string[] splited = f.FullName.Replace('\\', '/').Split(":");
+                    string fullName = "Disk_" + splited[0] + splited[1];
+                    return new FileInfoDTO(f.Name, f.CreationTimeUtc, f.LastWriteTimeUtc, f.Length, fullName, FileType.File);
+                });
                 nestedFilesInfo = new NestedFilesInfoResult(filesInfo);
             }
             catch (DirectoryNotFoundException directoryNotFoundException)
@@ -79,7 +78,8 @@ namespace NetworkMessage.Windows.WindowsCommand
             }
             catch (UnauthorizedAccessException unauthorizedAccessException)
             {
-                nestedFilesInfo = new NestedFilesInfoResult("Отсутствует необходимое разрешение", unauthorizedAccessException);
+                nestedFilesInfo =
+                    new NestedFilesInfoResult("Отсутствует необходимое разрешение", unauthorizedAccessException);
             }
             catch (Exception exception)
             {
