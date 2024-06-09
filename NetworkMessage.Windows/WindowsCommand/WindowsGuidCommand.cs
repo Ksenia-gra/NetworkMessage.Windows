@@ -1,13 +1,7 @@
 ﻿using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
 using NetworkMessage.CommandsResults.ConcreteCommandResults;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Win32;
 
 namespace NetworkMessage.Windows.WindowsCommand
 {
@@ -15,8 +9,9 @@ namespace NetworkMessage.Windows.WindowsCommand
     {
         public override Task<BaseNetworkCommandResult> ExecuteAsync(CancellationToken token = default, params object[] objects)
         {
-            var guid = Assembly.GetExecutingAssembly().GetType().GUID.ToString();
-            BaseNetworkCommandResult guidResult = new DeviceGuidResult(guid);
+			string key = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Cryptography";
+			string guid = (string)Registry.GetValue(key, "MachineGuid", (object)"default");
+			BaseNetworkCommandResult guidResult = new DeviceGuidResult(guid);
             return Task.FromResult(guidResult);
         }
     }

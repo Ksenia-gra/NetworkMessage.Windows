@@ -1,9 +1,9 @@
 ﻿using NetworkMessage.Commands;
 using NetworkMessage.CommandsResults;
 using NetworkMessage.CommandsResults.ConcreteCommandResults;
-using NetworkMessage.Models;
 using System.IO;
 using System.Security;
+using NetworkMessage.DTO;
 
 namespace NetworkMessage.Windows.WindowsCommand
 {
@@ -24,7 +24,7 @@ namespace NetworkMessage.Windows.WindowsCommand
                         path = path[1..];
                     }
                     
-                    if (path.Last() != '/')
+                    if (path.LastOrDefault() != '/')
                     {
                         path += '/';
                     }
@@ -42,9 +42,9 @@ namespace NetworkMessage.Windows.WindowsCommand
                 const string disk = "disk_";
                 if (string.IsNullOrWhiteSpace(Path) || Path == "/") 
                 {
-                    IEnumerable<MyDirectoryInfo> drivesInfo = DriveInfo.GetDrives()
+                    IEnumerable<FileInfoDTO> drivesInfo = DriveInfo.GetDrives()
                         .Select(d => "Disk_" + d.Name[..d.Name.IndexOf(':')])
-                        .Select(d => new MyDirectoryInfo(d));
+                        .Select(d => new FileInfoDTO(d, null, null, null, d, FileType.Drive));
                     nestedDirectoriesInfo = new NestedDirectoriesInfoResult(drivesInfo);
                     return Task.FromResult(nestedDirectoriesInfo);
                 }
@@ -58,12 +58,12 @@ namespace NetworkMessage.Windows.WindowsCommand
                     return Task.FromResult(nestedDirectoriesInfo);
                 }
                 
-                IEnumerable<MyDirectoryInfo> directoriesInfo
+                IEnumerable<FileInfoDTO> directoriesInfo
                     = directoryInfo.GetDirectories().Select(d =>
                     {
                         string[] splited = d.FullName.Replace('\\', '/').Split(":");
                         string fullName = "Disk_" + splited[0] + splited[1];
-                        return new MyDirectoryInfo(d.Name, d.CreationTimeUtc, d.LastWriteTimeUtc, fullName);
+                        return new FileInfoDTO(d.Name, d.CreationTimeUtc, d.LastWriteTimeUtc, null, fullName, FileType.Directory);
                     });
                 nestedDirectoriesInfo = new NestedDirectoriesInfoResult(directoriesInfo);
             }
